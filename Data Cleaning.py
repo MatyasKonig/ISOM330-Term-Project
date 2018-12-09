@@ -13,6 +13,6 @@ with open('variable names.txt', 'r') as inFile:
 	varNames = inFile.read()
 	varComp = re.compile(r'--\s(\w+)')
 	varMatch = varComp.findall(varNames)
-	df = pd.read_csv('communities_cleaned.csv',names = varMatch)
+	df = pd.read_csv('communities.csv',names = varMatch)
 
 
