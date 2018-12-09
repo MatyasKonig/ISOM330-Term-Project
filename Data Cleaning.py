@@ -51,7 +51,13 @@ stateAvgCrime = pd.DataFrame(stateAvgCrime).reset_index()
 sns.catplot('state_abv','ViolentCrimesPerPop',data=stateAvgCrime,
             kind='strip')
 
+
+df[df['ViolentCrimesPerPop'] >= dangerThreshold]
+
+df.to_csv('cleaned_data.csv', index = False)
+
 sns.pairplot(df)
+
 
 
 stateAvgBlack = df.groupby('state_abv')['ViolentCrimesPerPop','racepctblack'].mean()
@@ -61,3 +67,4 @@ stateAvgBlack = pd.DataFrame(stateAvgBlack).reset_index()
 ax = sns.scatterplot('ViolentCrimesPerPop','racepctblack',data=stateAvgBlack)
 ax.set(xlabel='Violent Crimes Per Population',ylabel='Percentage of Pop African American')
 plt.savefig('crimeVSblackpctpop.png')
+
