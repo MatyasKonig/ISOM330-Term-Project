@@ -49,3 +49,4 @@ stateAvgCrime = pd.DataFrame(stateAvgCrime).reset_index()
 sns.catplot('state_abv','ViolentCrimesPerPop',data=stateAvgCrime,
             kind='strip')
 
+sns.pairplot(df)
