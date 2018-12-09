@@ -35,3 +35,5 @@ dangerThreshold = df['ViolentCrimesPerPop'].quantile(.90)
 
 
 df[df['ViolentCrimesPerPop'] >= dangerThreshold]
+
+df.to_csv('cleaned_data.csv', index = False)
