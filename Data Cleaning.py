@@ -11,6 +11,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+sns.set()
+
 with open('variable names.txt', 'r') as inFile: 
     #var name is txt file with variable names
 	varNames = inFile.read()
@@ -55,4 +57,14 @@ df[df['ViolentCrimesPerPop'] >= dangerThreshold]
 df.to_csv('cleaned_data.csv', index = False)
 
 sns.pairplot(df)
+
+
+
+stateAvgBlack = df.groupby('state_abv')['ViolentCrimesPerPop','racepctblack'].mean()
+stateAvgBlack = pd.DataFrame(stateAvgBlack).reset_index()
+
+#create graph for racepct black versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','racepctblack',data=stateAvgBlack)
+ax.set(xlabel='Violent Crimes Per Population',ylabel='Percentage of Pop African American')
+plt.savefig('crimeVSblackpctpop.png')
 
