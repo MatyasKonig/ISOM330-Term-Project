@@ -60,11 +60,110 @@ sns.pairplot(df)
 
 
 
-stateAvgBlack = df.groupby('state_abv')['ViolentCrimesPerPop','racepctblack'].mean()
-stateAvgBlack = pd.DataFrame(stateAvgBlack).reset_index()
+stateAvgRace = df.groupby('state_abv')['ViolentCrimesPerPop', 'racepctblack', 'racePctWhite', 'racePctAsian', 'racePctHisp'].mean()
+stateAvgRace = pd.DataFrame(stateAvgRace).reset_index()
+
+def graph(xVar, yVar, title, xLabel, yLabel, imgName):
+	tempData = df.groupby('state_abv')[xVar, yVar].mean()
+	ax = sns.regplot(xVar, yVar, data = tempData)
+	ax.set(title = title, xlabel = xLabel, ylabel = yLabel)
+	plt.savefig(imgName + '.png', dpi = 300)
+	plt.show()
+	print(tempData.corr())
+
+graph('ViolentCrimesPerPop', 'racepctblack', 'Violent Crimes per Pct of African American Population',
+	'Violent Crimes Per Population', 'Percentage of Pop African American', 'crimeVSblackpctpop')
 
 #create graph for racepct black versus violent crimes per pop
-ax = sns.scatterplot('ViolentCrimesPerPop','racepctblack',data=stateAvgBlack)
-ax.set(xlabel='Violent Crimes Per Population',ylabel='Percentage of Pop African American')
-plt.savefig('crimeVSblackpctpop.png')
+ax = sns.regplot('ViolentCrimesPerPop','racepctblack', data=df.groupby('state_abv')['ViolentCrimesPerPop', 'racepctblack'].mean())
+ax.set(title = 'Violent Crimes per Pct of African American Population', xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop African American')
+plt.savefig('crimeVSblackpctpop.png', dpi = 300)
+plt.show()
+df.groupby('state_abv')['ViolentCrimesPerPop', 'racepctblack'].mean().corr()
+
+#create graph for racepct white versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','racePctWhite', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop White')
+plt.savefig('crimeVSwhitepctpop.png', dpi = 300)
+
+#create graph for racepct asian versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','racePctAsian', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop Asian')
+plt.savefig('crimeVSasianpctpop.png', dpi = 300)
+
+#create graph for racepct Hisp versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','racePctHisp', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop Hisp')
+plt.savefig('crimeVShisppctpop.png', dpi = 300)
+
+#create graph for racepct black versus violent crimes per pop
+ax = sns.regplot('ViolentCrimesPerPop','racepctblack', data = df, line_kws={"color": "red"})
+plt.show()
+df.corr()
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop African American')
+plt.savefig('crimeVSblackpctpop.png', dpi = 300)
+
+#create graph for racepct white versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','racePctWhite', data = df)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop White')
+plt.savefig('crimeVSwhitepctpop.png', dpi = 300)
+
+#create graph for racepct asian versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','racePctAsian', data = df)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop Asian')
+plt.savefig('crimeVSasianpctpop.png', dpi = 300)
+
+#create graph for racepct Hisp versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','racePctHisp', data = df)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop Hisp')
+plt.savefig('crimeVShisppctpop.png', dpi = 300)
+
+
+stateAvgRace = df.groupby('state_abv')['ViolentCrimesPerPop', 'agePct12t21', 'agePct12t29', 'agePct16t24', 'agePct65up'].mean()
+stateAvgRace = pd.DataFrame(stateAvgRace).reset_index()
+
+#create graph for racepct black versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','agePct12t21', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop African American')
+plt.savefig('crimeVSblackpctpop.png', dpi = 300)
+
+#create graph for racepct white versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','agePct12t29', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop White')
+plt.savefig('crimeVSwhitepctpop.png', dpi = 300)
+
+#create graph for racepct asian versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','agePct16t24', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop Asian')
+plt.savefig('crimeVSasianpctpop.png', dpi = 300)
+
+#create graph for racepct Hisp versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','agePct65up', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop Hisp')
+plt.savefig('crimeVShisppctpop.png', dpi = 300)
+
+stateAvgRace = df.groupby('state_abv')['ViolentCrimesPerPop', 'NumInShelters', 'NumStreet', 'PctUnemployed', 'PctEmploy'].mean()
+stateAvgRace = pd.DataFrame(stateAvgRace).reset_index()
+
+#create graph for racepct black versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','NumInShelters', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop African American')
+plt.savefig('crimeVSblackpctpop.png', dpi = 300)
+
+#create graph for racepct white versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','NumStreet', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop White')
+plt.savefig('crimeVSwhitepctpop.png', dpi = 300)
+
+#create graph for racepct asian versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','PctUnemployed', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop Asian')
+plt.savefig('crimeVSasianpctpop.png', dpi = 300)
+
+#create graph for racepct Hisp versus violent crimes per pop
+ax = sns.scatterplot('ViolentCrimesPerPop','PctEmploy', data=stateAvgRace)
+ax.set(xlabel='Violent Crimes Per Population', ylabel='Percentage of Pop Hisp')
+plt.savefig('crimeVShisppctpop.png', dpi = 300)
+
+ax = sns.scatterplot(data = df.groupby('state_abv')['population'].sum())
 
