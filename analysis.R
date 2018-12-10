@@ -38,8 +38,6 @@ corrplot(cor1,tl.cex=0.4,order='hclust')
 df_ViolentCrimesPerPop_num = cbind(df_ViolentCrimesPerPop_num,df_ViolentCrimesPerPop[,which(names(df_ViolentCrimesPerPop) %in% var_to_keep)]) 
 df_ViolentCrimesPerPop = df_ViolentCrimesPerPop_num
 
-#df_ViolentCrimesPerPop[reg.summary$adjr2[which.max(reg.summary$adjr2)],]
-
 #backward selection of data
 regit.bwd = regsubsets(ViolentCrimesPerPop~.-state,data=df_ViolentCrimesPerPop,nvmax=49,method='backward')
 summary(regit.bwd)
@@ -54,13 +52,37 @@ bestVars
 df.lm = df[, which(names(df) %in% c(bestVars,'state','ViolentCrimesPerPop'))]
 df.lm
 
-#-----
+#get normalized data for better modeling
+normalized_data = read.csv('Data/cleaned_normalized_data.csv')
+
+  #add communityname back to dataframe for merging
+df.lm$communityname = df$communityname
+
+#add missing variables
+missingColandKeys = c("OtherPerCap","PctKidsBornNeverMar","OwnOccQrange","RentQrange",'state','communityname')
+
+    #change column names to matching values
+normalized_data$state = normalized_data$state_abv
+
+#merge data to get missing columns
+df_to_merge = df[,which(names(df) %in% missingColandKeys)]
+normalized_data = merge(normalized_data,df_to_merge,by=c('communityname','state'))
+
+final_normalized_data = normalized_data[, which(names(normalized_data) %in% names(df.lm))]
+
+col_to_normalize=c("OtherPerCap","PctKidsBornNeverMar","OwnOccQrange","RentQrange")
+final_normalized_data[col_to_normalize] = lapply(final_normalized_data[col_to_normalize],scale)
+
+#exclude communityname from data
+final_normalized_data$communityname = NULL
+
+#-------------REGRESSION----------
 #divide data into training and testing sets
 library(caTools)
 set.seed(13)
-sample=sample.split(df.lm,SplitRatio = .75)
-train=subset(df.lm,sample==TRUE)
-test=subset(df.lm,sample==FALSE)
+sample=sample.split(final_normalized_data,SplitRatio = .8)
+train=subset(final_normalized_data,sample==TRUE)
+test=subset(final_normalized_data,sample==FALSE)
 
 #run linear model for training data
 lm.fit = lm(ViolentCrimesPerPop~.,data=train)
@@ -77,33 +99,37 @@ abline(h=1,col='red')
 lm.pred = predict(lm.fit,test)
 test_MSE = mean(lm.pred-test$ViolentCrimesPerPop)^2
 test_MSE 
-#___
 
-#classification model
-quantile = quantile(df_ViolentCrimesPerPop$ViolentCrimesPerPop,.70)
+
+#test quadratic model
+lm.fit.log = lm(log(ViolentCrimesPerPop)~.,data=df.lm)
+#_________________
+
+#--------------classification model
+quantile = quantile(final_normalized_data$ViolentCrimesPerPop,.70)
 quantile
 
 #classify neighborhoods that are in the top 95 quartile of violent crimes per pop as dangerous
-dangerous_neighborhood = df.lm$ViolentCrimesPerPop > quantile
-df.lm[dangerous_neighborhood,]
-df.lm$dangerous_neighborhood = rep(FALSE,1901)
-df.lm$dangerous_neighborhood[dangerous_neighborhood] = TRUE
+dangerous_neighborhood = final_normalized_data$ViolentCrimesPerPop > quantile
+final_normalized_data[dangerous_neighborhood,]
+final_normalized_data$dangerous_neighborhood = rep(FALSE,1900)
+final_normalized_data$dangerous_neighborhood[dangerous_neighborhood] = TRUE
 
-sampleClassification = sample.split(df.lm,SplitRatio = .75)
-trainClassification = subset(df.lm,sample==TRUE)
-testClassification = subset(df.lm,sample==FALSE)
+sampleClassification = sample.split(final_normalized_data,SplitRatio = .75)
+trainClassification = subset(final_normalized_data,sample==TRUE)
+testClassification = subset(final_normalized_data,sample==FALSE)
 
 #try a logistic model
 glm.fits = glm(dangerous_neighborhood~.-ViolentCrimesPerPop,data=trainClassification,family=binomial)
 summary(glm.fits)
 #get result for training data
 glm.probs_train=predict(glm.fits,type='response')
-glm.pred_train=rep(FALSE,1393)
+glm.pred_train=rep(FALSE,dim(trainClassification)[1])
 glm.pred_train[glm.probs_train>.5]=TRUE
 
 #get result for testing data
 glm.probs_test=predict(glm.fits,testClassification,type='response')
-glm.pred_test=rep(FALSE,508)
+glm.pred_test=rep(FALSE,dim(testClassification)[1])
 glm.pred_test[glm.probs_test>.5]=TRUE
 
 #get confusion table for training data
@@ -120,7 +146,7 @@ test_error_rate
 
 
 #try a lda model
-lda.fit = lda(dangerous_neighborhood~.-ViolentCrimesPerPop,data=train)
+lda.fit = lda(dangerous_neighborhood~.-ViolentCrimesPerPop,data=trainClassification)
 lda.fit
 
 #try a KNN model
