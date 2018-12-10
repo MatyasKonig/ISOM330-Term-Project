@@ -52,48 +52,57 @@ bestVars
 df.lm = df[, which(names(df) %in% c(bestVars,'state','ViolentCrimesPerPop'))]
 df.lm
 
+#---------------Standardization -NOT USING---------
 #get normalized data for better modeling
-normalized_data = read.csv('Data/cleaned_normalized_data.csv')
+#normalized_data = read.csv('Data/cleaned_normalized_data.csv')
 
   #add communityname back to dataframe for merging
-df.lm$communityname = df$communityname
+#df.lm$communityname = df$communityname
 
 #add missing variables
-missingColandKeys = c("OtherPerCap","PctKidsBornNeverMar","OwnOccQrange","RentQrange",'state','communityname')
+#missingColandKeys = c("OtherPerCap","PctKidsBornNeverMar","OwnOccQrange","RentQrange",'state','communityname')
 
     #change column names to matching values
-normalized_data$state = normalized_data$state_abv
+#normalized_data$state = normalized_data$state_abv
 
 #merge data to get missing columns
-df_to_merge = df[,which(names(df) %in% missingColandKeys)]
-normalized_data = merge(normalized_data,df_to_merge,by=c('communityname','state'))
+#df_to_merge = df[,which(names(df) %in% missingColandKeys)]
+#normalized_data = merge(normalized_data,df_to_merge,by=c('communityname','state'))
 
-final_normalized_data = normalized_data[, which(names(normalized_data) %in% names(df.lm))]
+#final_normalized_data = normalized_data[, which(names(normalized_data) %in% names(df.lm))]
 
-col_to_normalize=c("OtherPerCap","PctKidsBornNeverMar","OwnOccQrange","RentQrange")
-final_normalized_data[col_to_normalize] = lapply(final_normalized_data[col_to_normalize],scale)
+#col_to_normalize=c("OtherPerCap","PctKidsBornNeverMar","OwnOccQrange","RentQrange")
+#final_normalized_data[col_to_normalize] = lapply(final_normalized_data[col_to_normalize],scale)
 
 #exclude communityname from data
-final_normalized_data$communityname = NULL
+#final_normalized_data$communityname = NULL
+#----------------------END STANDARDIZATION
+
+library(caret)
+df.lm.num =  df.lm[, unlist(lapply(df.lm,is.numeric))]
+trans = preProcess(df.lm.num,method=c('BoxCox','center','scale'))
+
+df.processed = predict(trans,df.lm.num)
+
+#add back state in
+df.processed$state = df$state
 
 #-------------REGRESSION----------
 #divide data into training and testing sets
 library(caTools)
 set.seed(13)
-sample=sample.split(final_normalized_data,SplitRatio = .8)
+sample=sample.split(df.processed,SplitRatio = .8)
 train=subset(final_normalized_data,sample==TRUE)
 test=subset(final_normalized_data,sample==FALSE)
 
 #run linear model for training data
 lm.fit = lm(ViolentCrimesPerPop~.,data=train)
 summary(lm.fit)
+par(mfrow=c(2,2))
+plot(lm.fit)
+
 train_MSE = mean(summary(lm.fit)$residuals)^2
 train_MSE
-
-#cook distance
-cd = cooks.distance(lm.fit)
-plot(cd,pch='*',main='Outliers by Cook"s Distance')
-abline(h=1,col='red')
 
 #run model on test data
 lm.pred = predict(lm.fit,test)
@@ -102,35 +111,40 @@ test_MSE
 
 
 #test quadratic model
-lm.fit.log = lm(log(ViolentCrimesPerPop)~.,data=df.lm)
+lm.fit.1 = lm(ViolentCrimesPerPop~ .+ I(PctKidsBornNeverMar^3),data=df.processed)
+summary(lm.fit.1)
+par(mfrow=c(2,2))
+plot(lm.fit.1)
+
+
 #_________________
 
 #--------------classification model
-quantile = quantile(final_normalized_data$ViolentCrimesPerPop,.70)
+quantile = quantile(df.processed$ViolentCrimesPerPop,.85)
 quantile
 
 #classify neighborhoods that are in the top 95 quartile of violent crimes per pop as dangerous
-dangerous_neighborhood = final_normalized_data$ViolentCrimesPerPop > quantile
-final_normalized_data[dangerous_neighborhood,]
-final_normalized_data$dangerous_neighborhood = rep(FALSE,1900)
-final_normalized_data$dangerous_neighborhood[dangerous_neighborhood] = TRUE
+dangerous_neighborhood = df.processed$ViolentCrimesPerPop > quantile
+df.processed[dangerous_neighborhood,]
+df.processed$dangerous_neighborhood = rep(FALSE,1901)
+df.processed$dangerous_neighborhood[dangerous_neighborhood] = TRUE
 
-sampleClassification = sample.split(final_normalized_data,SplitRatio = .75)
-trainClassification = subset(final_normalized_data,sample==TRUE)
-testClassification = subset(final_normalized_data,sample==FALSE)
+sampleClassification = sample.split(df.processed,SplitRatio = .70)
+trainClassification = subset(df.processed,sample==TRUE)
+testClassification = subset(df.processed,sample==FALSE)
 
 #try a logistic model
-glm.fits = glm(dangerous_neighborhood~.-ViolentCrimesPerPop,data=trainClassification,family=binomial)
+glm.fits = glm(dangerous_neighborhood~.-ViolentCrimesPerPop,data=df.processed,family=binomial)
 summary(glm.fits)
 #get result for training data
 glm.probs_train=predict(glm.fits,type='response')
 glm.pred_train=rep(FALSE,dim(trainClassification)[1])
-glm.pred_train[glm.probs_train>.5]=TRUE
+glm.pred_train[glm.probs_train>.2]=TRUE
 
 #get result for testing data
 glm.probs_test=predict(glm.fits,testClassification,type='response')
 glm.pred_test=rep(FALSE,dim(testClassification)[1])
-glm.pred_test[glm.probs_test>.5]=TRUE
+glm.pred_test[glm.probs_test>.2]=TRUE
 
 #get confusion table for training data
 train_cm = table(glm.pred_train,trainClassification$dangerous_neighborhood)
