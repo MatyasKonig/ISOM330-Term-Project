@@ -36,6 +36,13 @@ df_ViolentCrimesPerPop_num = cbind(df_ViolentCrimesPerPop_num,df_ViolentCrimesPe
 df_ViolentCrimesPerPop = df_ViolentCrimesPerPop_num
 
 # best selection
+regfit.full = regsubsets(ViolentCrimesPerPop ~ . -state, data = df_ViolentCrimesPerPop, nvmax = 49)
+reg.summary = summary(regfit.full)
+bestmodel = which.max(reg.summary$adjr2)
+summart_bestmodel = reg.summary$which[bestmodel,]
+summart_bestmodel
+
+df_ViolentCrimesPerPop[reg.summary$adjr2[which.max(reg.summary$adjr2)],]
 
 #backward selection of data
 regit.bwd = regsubsets(ViolentCrimesPerPop~.-state,data=df_ViolentCrimesPerPop,nvmax=49,method='backward')
