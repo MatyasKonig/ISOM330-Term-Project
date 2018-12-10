@@ -3,13 +3,11 @@
 """
 Created on Mon Dec 10 01:08:53 2018
 
-@author: chloedinh
+@author: mkonig and chloedinh
 """
 
 import re
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 sns.set()
 
