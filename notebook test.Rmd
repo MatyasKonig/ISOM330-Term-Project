@@ -10,6 +10,8 @@ Try executing this chunk by clicking the *Run* button within the chunk or by pla
 ```{r setup, include=FALSE}
 library(reticulate)
 use_python('/Applications/anaconda3/bin/python')
+
+import('pandas')
 ```
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
@@ -54,6 +56,11 @@ df[df['ViolentCrimesPerPop'] >= dangerThreshold]
 #get the state's avg crime rate 
 stateAvgCrime = df.groupby('state_abv')['ViolentCrimesPerPop'].mean()
 stateAvgCrime = pd.DataFrame(stateAvgCrime).reset_index()
+
+```
+
+
+```{python}
 
 ```
 
