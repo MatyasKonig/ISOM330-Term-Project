@@ -14,16 +14,16 @@ predictVars = c('murders','murdPerPop','rapes','rapesPerPop','robberies',
 
 #exclude other predictive variables
 df_ViolentCrimesPerPop = df[, -which(names(df) %in% c(predictVars,'fold'))]
-df_ViolentCrimesPerPop_num = df_ViolentCrimesPerPop[, unlist(lapply(df_ViolentCrimesPerPop,is.numeric))]
 
 ### DETECT MULTICOLINARITY
+df_ViolentCrimesPerPop_num = df_ViolentCrimesPerPop[, unlist(lapply(df_ViolentCrimesPerPop,is.numeric))]
 cor = cor(df_ViolentCrimesPerPop_num)
 corrplot(cor,tl.cex=0.4,order='hclust')
 
 highCorr = findCorrelation(cor, cutoff=0.75,names=FALSE)
 highCorr
 
-#create rate for highly correlated variables
+#create rate for percent in shelter
 df_ViolentCrimesPerPop_num$pctInShelters = df_ViolentCrimesPerPop_num$NumInShelters/df_ViolentCrimesPerPop_num$population
 
 #var to keep
@@ -38,14 +38,7 @@ corrplot(cor1,tl.cex=0.4,order='hclust')
 df_ViolentCrimesPerPop_num = cbind(df_ViolentCrimesPerPop_num,df_ViolentCrimesPerPop[,which(names(df_ViolentCrimesPerPop) %in% var_to_keep)]) 
 df_ViolentCrimesPerPop = df_ViolentCrimesPerPop_num
 
-# best selection
-regfit.full = regsubsets(ViolentCrimesPerPop ~ . -state, data = df_ViolentCrimesPerPop, nvmax = 49)
-reg.summary = summary(regfit.full)
-bestmodel = which.max(reg.summary$adjr2)
-summart_bestmodel = reg.summary$which[bestmodel,]
-summart_bestmodel
-
-df_ViolentCrimesPerPop[reg.summary$adjr2[which.max(reg.summary$adjr2)],]
+#df_ViolentCrimesPerPop[reg.summary$adjr2[which.max(reg.summary$adjr2)],]
 
 #backward selection of data
 regit.bwd = regsubsets(ViolentCrimesPerPop~.-state,data=df_ViolentCrimesPerPop,nvmax=49,method='backward')
@@ -60,6 +53,7 @@ bestVars
 
 df.lm = df[, which(names(df) %in% c(bestVars,'state','ViolentCrimesPerPop'))]
 df.lm
+
 #-----
 #divide data into training and testing sets
 library(caTools)
