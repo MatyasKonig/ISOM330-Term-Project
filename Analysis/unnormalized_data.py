@@ -11,13 +11,13 @@ import pandas as pd
 
 sns.set()
 
-with open('variblenamesunstandardized.txt', 'r') as inFile: 
+with open('Data/variableNames_unnormalized.txt', 'r') as inFile:
     #var name is txt file with variable names
 	varNames = inFile.read()
 	varComp = re.compile(r'--\s(\w+)')
     #use regular expression to extract var names from string
 	varMatch = varComp.findall(varNames)
-	df = pd.read_csv('CommViolPredUnnormalizedData.txt',names = varMatch,na_values=['?'])
+	df = pd.read_csv('Data/unnormalized_communities.txt',names = varMatch,na_values=['?'])
 
 
 
