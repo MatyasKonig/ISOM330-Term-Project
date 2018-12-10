@@ -6,20 +6,15 @@ sns.set()
 
 df = pd.read_csv('Data/cleaned_unnormalized_data.csv')
 
+ax = sns.regplot('racePctWhite', 'ViolentCrimesPerPop', data = df, scatter_kws={"color": sns.xkcd_rgb["kiwi green"]}, line_kws={"color": sns.xkcd_rgb["dark grass green"]})
+ax = sns.regplot('racepctblack', 'ViolentCrimesPerPop', data = df, scatter_kws={"color": sns.xkcd_rgb["blue"]}, line_kws={"color": sns.xkcd_rgb["royal blue"]})
+ax = sns.regplot('racePctHisp', 'ViolentCrimesPerPop', data = df, scatter_kws={"color": sns.xkcd_rgb["manilla"]}, line_kws={"color": sns.xkcd_rgb["sun yellow"]})
+ax = sns.regplot('racePctAsian', 'ViolentCrimesPerPop', data = df, scatter_kws={"color": sns.xkcd_rgb["pale red"]}, line_kws={"color": sns.xkcd_rgb["crimson"]})
+plt.savefig('Visuals/crimesPlot.png', dpi = 300)
 
-def graph(xVar, yVar, title, xLabel, yLabel, imgName):
-	tempData = df.groupby('state')[xVar, yVar].mean()
-	ax = sns.regplot(xVar, yVar, data = tempData)
-	ax.set(title = title, xlabel = xLabel, ylabel = yLabel)
-	plt.savefig(imgName + '.png', dpi = 300)
-	plt.show()
-	print(tempData.corr())
-    
-graph('ViolentCrimesPerPop', 'racepctblack', 'Violent Crimes per Pct of African American Population',
-	'Violent Crimes Per Population', 'Percentage of Pop African American', 'crimeVSblackpctpop')
 
-ax = sns.regplot('ViolentCrimesPerPop', 'racepctblack', data = df, line_kws={"color": "darkblue"})
-ax = sns.regplot('ViolentCrimesPerPop', 'racePctAsian', data = df, line_kws={"color": sns.xkcd_rgb["pale red"]})
-ax = sns.regplot('ViolentCrimesPerPop', 'racePctWhite', data = df, line_kws={"color": "darkgreen"})
-ax = sns.regplot('ViolentCrimesPerPop', 'racePctHisp', data = df, line_kws={"color": "black"})
-plt.savefig('Visuals/plot.png', dpi = 300)
+ax = sns.regplot('racePctWhite', 'medIncome', data = df, scatter_kws={"color": sns.xkcd_rgb["kiwi green"]}, line_kws={"color": sns.xkcd_rgb["dark grass green"]})
+ax = sns.regplot('racePctHisp', 'medIncome', data = df, scatter_kws={"color": sns.xkcd_rgb["manilla"]}, line_kws={"color": sns.xkcd_rgb["sun yellow"]})
+ax = sns.regplot('racepctblack', 'medIncome', data = df, scatter_kws={"color": sns.xkcd_rgb["blue"]}, line_kws={"color": sns.xkcd_rgb["royal blue"]})
+ax = sns.regplot('racePctAsian', 'medIncome', data = df, scatter_kws={"color": sns.xkcd_rgb["pale red"]}, line_kws={"color": sns.xkcd_rgb["crimson"]})
+plt.savefig('Visuals/incomePlot.png', dpi = 300)

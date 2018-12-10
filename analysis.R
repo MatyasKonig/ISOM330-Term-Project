@@ -2,7 +2,8 @@ library(leaps)
 library(car)
 library(corrplot)
 library(caret)
-df = read.csv('cleaned_unnormalized_data.csv')
+df = read.csv('Data/cleaned_unnormalized_data.csv')
+
 predictVars = c('murders','murdPerPop','rapes','rapesPerPop','robberies',
                 'robbbPerPop','assaults','assaultPerPop','burglaries',
                 'burglPerPop','larcenies','larcPerPop','autoTheft','autoTheftPerPop',
@@ -33,6 +34,8 @@ corrplot(cor1,tl.cex=0.4,order='hclust')
 #add back in vars we care about 
 df_ViolentCrimesPerPop_num = cbind(df_ViolentCrimesPerPop_num,df_ViolentCrimesPerPop[,which(names(df_ViolentCrimesPerPop) %in% var_to_keep)]) 
 df_ViolentCrimesPerPop = df_ViolentCrimesPerPop_num
+
+# best selection
 
 #backward selection of data
 regit.bwd = regsubsets(ViolentCrimesPerPop~.-state,data=df_ViolentCrimesPerPop,nvmax=49,method='backward')
